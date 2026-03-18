@@ -7,26 +7,20 @@
 #include <cstdint>
 #include <algorithm>
 
-// Phase 4: Cache Line Optimization
-// 64-byte alignment and tightly packed variables.
-// Fits perfectly into L1 cache lines.
 struct alignas(64) Order {
     double price;
     uint32_t quantity;
     bool is_buy;
 };
 
-// Phase 4 & Phase 2: Align arrays to cache lines 
 struct alignas(64) LevelData {
     uint32_t buy_quantity = 0;
     uint32_t sell_quantity = 0;
 };
 
-// Phase 2 & 3: O(1) Array with Pre-allocated Memory
 constexpr size_t MAX_PRICE_LEVELS = 1000000;
 
 class OrderBook {
-    // Phase 2: Reserving this once keeps dynamic allocations OUT of the trading path
     std::vector<LevelData> book;
     uint32_t trades_executed = 0;
 
@@ -39,7 +33,6 @@ public:
     }
 
     void addOrder(const Order& order) {
-        // Phase 3: Array Index represents price level (O(1) access)
         int price_index = static_cast<int>(order.price * 100);
         
         if (order.is_buy) {
