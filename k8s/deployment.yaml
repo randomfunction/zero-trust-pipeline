@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-engine-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: trading-engine
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: trading-engine
+    spec:
+      containers:
+      - name: trading-engine
+        image: trading-engine:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080

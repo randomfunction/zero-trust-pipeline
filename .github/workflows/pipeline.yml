@@ -5,19 +5,19 @@ on:
     branches: [ "main" ]
 
 jobs:
-  security-and-build:
+  devsecops-pipeline:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
-    - name: SAST Scan 
+    - name: SAST Scan
       run: |
         sudo apt-get update
         sudo apt-get install -y cppcheck
         cppcheck --error-exitcode=1 --enable=all --suppress=missingIncludeSystem .
 
-    - name: Build Container
+    - name: Build Container Image
       run: docker build -t trading-engine:${{ github.sha }} .
 
     - name: Container Image Scan
@@ -30,5 +30,19 @@ jobs:
         vuln-type: 'os,library'
         severity: 'CRITICAL,HIGH'
 
-    - name: Run Trading Engine (Test)
-      run: docker run trading-engine:${{ github.sha }}
+    - name: Create Kubernetes Cluster
+      uses: helm/kind-action@v1.8.0
+
+    - name: Load Image into Kubernetes
+      run: |
+        docker tag trading-engine:${{ github.sha }} trading-engine:latest
+        kind load docker-image trading-engine:latest
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f k8s/deployment.yaml
+        kubectl apply -f k8s/service.yaml
+        kubectl rollout status deployment/trading-engine-deployment --timeout=90s
+
+    - name: Verify Deployment
+      run: kubectl get pods,svc
