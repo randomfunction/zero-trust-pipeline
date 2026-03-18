@@ -1,32 +1,36 @@
-name: Zero-Trust Trading Engine Pipeline
+name: Zero-Trust Pipeline
 
 on:
   push:
     branches: [ "main" ]
 
 jobs:
-  devsecops-pipeline:
+  sast-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: github/codeql-action/init@v3
+      with:
+        languages: cpp
+        
+    - run: |
+        g++ -o engine_test main.cpp
+        ./engine_test --test
+        
+    - uses: github/codeql-action/analyze@v3
 
+  build-and-deploy:
+    needs: sast-and-test
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
 
-    - name: SAST Scan
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y cppcheck
-        cppcheck --error-exitcode=1 --enable=all --suppress=missingIncludeSystem .
+    - run: docker build -t trading-engine:${{ github.sha }} .
 
-    - name: Compile and Run Unit Tests
-      run: |
-        g++ -o engine_test main.cpp
-        ./engine_test --test
-
-    - name: Build Container Image
-      run: docker build -t trading-engine:${{ github.sha }} .
-
-    - name: Container Image Scan
-      uses: aquasecurity/trivy-action@master
+    - uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'trading-engine:${{ github.sha }}'
         format: 'table'
@@ -35,19 +39,25 @@ jobs:
         vuln-type: 'os,library'
         severity: 'CRITICAL,HIGH'
 
-    - name: Create Kubernetes Cluster
-      uses: helm/kind-action@v1.8.0
+    - uses: hashicorp/setup-terraform@v3
 
-    - name: Load Image into Kubernetes
-      run: |
+    - run: |
+        cd terraform
+        terraform init
+        terraform apply -auto-approve
+
+    - run: |
         docker tag trading-engine:${{ github.sha }} trading-engine:latest
-        kind load docker-image trading-engine:latest --name chart-testing
+        kind load docker-image trading-engine:latest --name zero-trust-cluster
 
-    - name: Deploy to Kubernetes
-      run: |
-        kubectl apply -f k8s/deployment.yaml
+    - run: |
+        kubectl apply -f k8s/blue.yaml
         kubectl apply -f k8s/service.yaml
-        kubectl rollout status deployment/trading-engine-deployment --timeout=90s
-
-    - name: Verify Deployment
-      run: kubectl get pods,svc
+        kubectl rollout status deployment/engine-blue
+        
+        kubectl apply -f k8s/green.yaml
+        kubectl rollout status deployment/engine-green
+        
+        kubectl patch service engine-service -p '{"spec":{"selector":{"version":"green"}}}'
+        
+        kubectl delete deployment engine-blue
