@@ -36,7 +36,7 @@ jobs:
     - name: Load Image into Kubernetes
       run: |
         docker tag trading-engine:${{ github.sha }} trading-engine:latest
-        kind load docker-image trading-engine:latest
+        kind load docker-image trading-engine:latest --name chart-testing
 
     - name: Deploy to Kubernetes
       run: |
