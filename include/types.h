@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <cstddef>
 
 constexpr size_t MAX_PRICE_LEVELS = 1000000;
 constexpr size_t MAX_ORDERS = 1000000;
