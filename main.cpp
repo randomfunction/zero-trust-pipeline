@@ -7,7 +7,6 @@
 #include <string>
 
 struct Order {
-    int id;
     double price;
     int quantity;
     bool is_buy;
@@ -53,8 +52,8 @@ public:
 
 void runTests() {
     OrderBook book;
-    book.addOrder({1, 100.5, 10, true});
-    book.addOrder({2, 100.0, 5, false});
+    book.addOrder({100.5, 10, true});
+    book.addOrder({100.0, 5, false});
     assert(book.getTrades() == 1);
     std::cout << "Unit Tests Passed.\n";
 }
