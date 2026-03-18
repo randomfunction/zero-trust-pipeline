@@ -5,7 +5,6 @@ OrderBook::OrderBook() : buy_bitmap(MAX_PRICE_LEVELS), sell_bitmap(MAX_PRICE_LEV
     book.resize(MAX_PRICE_LEVELS);
     order_pool.resize(MAX_ORDERS);
     
-    // Fill pre-allocated order pool free list 
     for (size_t i = 0; i < MAX_ORDERS - 1; ++i) {
         order_pool[i].next = &order_pool[i + 1];
     }
@@ -56,7 +55,6 @@ void OrderBook::removeOrderFromList(Order* order) {
 }
 
 bool OrderBook::addOrder(OrderId id, Price price, Quantity quantity, bool is_buy) {
-    // 5. Bounds Checking
     if (price >= static_cast<Price>(MAX_PRICE_LEVELS)) {
         std::cerr << "Order rejected: Price bounds exceeded.\n";
         return false;
@@ -65,7 +63,6 @@ bool OrderBook::addOrder(OrderId id, Price price, Quantity quantity, bool is_buy
     Order* order = allocateOrder();
     if (!order) return false;
 
-    // Phase 6: Fixed Point Math natively translates integer price into position.
     order->id = id;
     order->price = price;
     order->quantity = quantity;

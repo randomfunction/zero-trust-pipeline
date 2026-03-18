@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <iostream>
 
-// Phase 6: Removed alignas(64) to tightly pack LevelData
 struct LevelData {
     Order* head = nullptr;
     Order* tail = nullptr;
@@ -14,7 +13,6 @@ struct LevelData {
 class OrderBook {
     std::vector<LevelData> book;
     
-    // Phase 5: O(1) Instant Cancelation through Hash Map Tracker
     std::unordered_map<OrderId, Order*> order_map;
     
     std::vector<Order> order_pool;
@@ -32,7 +30,6 @@ class OrderBook {
 public:
     OrderBook();
 
-    // Returns false if order price is out of bounds
     bool addOrder(OrderId id, Price price, Quantity quantity, bool is_buy);
     void cancelOrder(OrderId id);
     void match();

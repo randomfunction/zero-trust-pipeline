@@ -8,7 +8,6 @@
 void runTests() {
     OrderBook book;
     
-    // Bounds check test
     bool ok = book.addOrder(999, 1000000, 10, true);
     assert(!ok);
 
@@ -16,7 +15,6 @@ void runTests() {
     book.addOrder(2, 10000, 5, false);   
     assert(book.getTrades() == 1);
 
-    // L3 Cancel Order logic 
     book.addOrder(3, 10020, 10, true);
     book.cancelOrder(3); 
     

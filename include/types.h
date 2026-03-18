@@ -8,7 +8,6 @@ using OrderId = uint64_t;
 using Price = uint64_t;
 using Quantity = uint32_t;
 
-// Intrusive Doubly Linked List Node for individual orders
 struct Order {
     OrderId id;
     Price price;

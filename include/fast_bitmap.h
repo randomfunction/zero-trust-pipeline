@@ -2,7 +2,6 @@
 #include <vector>
 #include <cstdint>
 
-// Phase 7: O(1) Bitmaps
 class FastBitmap {
     std::vector<uint64_t> L1; 
     std::vector<uint64_t> L2; 
