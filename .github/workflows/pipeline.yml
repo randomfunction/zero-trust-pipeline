@@ -12,10 +12,10 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: SAST Scan 
-          run: |
-            sudo apt-get update
-            sudo apt-get install -y cppcheck
-            cppcheck --error-exitcode=1 --enable=all --suppress=missingIncludeSystem .
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+        cppcheck --error-exitcode=1 --enable=all --suppress=missingIncludeSystem .
 
     - name: Build Container
       run: docker build -t trading-engine:${{ github.sha }} .
