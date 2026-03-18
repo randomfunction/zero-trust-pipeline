@@ -1,0 +1,31 @@
+name: Zero-Trust Trading Engine Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  security-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: SAST Scan 
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+        cppcheck --error-exitcode=1 --enable=all .
+
+    - name: Build Container
+      run: docker build -t trading-engine:${{ github.sha }} .
+
+    - name: Container Image Scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'trading-engine:${{ github.sha }}'
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
