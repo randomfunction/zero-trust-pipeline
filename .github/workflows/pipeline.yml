@@ -29,3 +29,6 @@ jobs:
         ignore-unfixed: true
         vuln-type: 'os,library'
         severity: 'CRITICAL,HIGH'
+
+    - name: Run Trading Engine (Test)
+      run: docker run trading-engine:${{ github.sha }}
