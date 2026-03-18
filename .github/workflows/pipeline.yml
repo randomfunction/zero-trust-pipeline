@@ -17,6 +17,11 @@ jobs:
         sudo apt-get install -y cppcheck
         cppcheck --error-exitcode=1 --enable=all --suppress=missingIncludeSystem .
 
+    - name: Compile and Run Unit Tests
+      run: |
+        g++ -o engine_test main.cpp
+        ./engine_test --test
+
     - name: Build Container Image
       run: docker build -t trading-engine:${{ github.sha }} .
 
